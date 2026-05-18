@@ -45,7 +45,7 @@ high_score =0
 
 
 pygame.mixer.init()
-merge_sound = pygame.mixer.Sound("Deep Meow Sound Effect.wav")
+merge_sound = pygame.mixer.Sound("Deep Meow Sound Effect (UPDATED).wav")
 
 
 
