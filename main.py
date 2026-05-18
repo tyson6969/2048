@@ -44,8 +44,8 @@ start_time = 0.0
 high_score =0 
 
 
-pygame.mixer.init()
-merge_sound = pygame.mixer.Sound("Deep Meow Sound Effect (UPDATED).wav")
+#pygame.mixer.init()
+#merge_sound = pygame.mixer.Sound("Deep Meow Sound Effect (UPDATED).wav")
 
 
 
@@ -225,8 +225,8 @@ def move_tiles(window, tiles, clock, direction):
                         high_score = score
 
                     next_tile.just_merged = True
-                    if merge_sound:
-                        merge_sound.play()
+                    # if merge_sound:
+                    #    merge_sound.play()
 
             elif move_check(tile, next_tile):
                 tile.move(delta)
