@@ -238,7 +238,7 @@ def draw_button(window, text, cx, cy, w, h, color, text_color = (255,255,255)):
     return rect 
 
 
-def wildcar_screen(window, clock):
+def wildcard_screen(window, clock):
 
     grid_size = 4
     MIN_SIZE = 3
@@ -255,7 +255,7 @@ def wildcar_screen(window, clock):
         size_text = TITLE_FONT.render(F'{grid_size}x {grid_size}', True, FONT_COLOR)
         window.blit(size_text, (WIDTH // 2 - size_text.get_width()// 2, 360))
 
-        hint = SMALL_FONT.render(f"(min {MIN_SIZE}  —  max {MAX_SIZE})", True. FONT_COLOR)
+        hint = SMALL_FONT.render(f"(min {MIN_SIZE}  —  max {MAX_SIZE})", True, FONT_COLOR)
         window.blit(hint, (WIDTH // 2 - hint.get_width()// 2, 360))
 
         left_btn = draw_button(window,"<", 240,300,110,70, arrow_color)
@@ -268,6 +268,17 @@ def wildcar_screen(window, clock):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return None
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if left_btn.collidepoint(event.pos):
+                    grid_size = max(MIN_SIZE, grid_size -1 )
+                elif right_btn.collidepoint(event.pos):
+                    grid_size = min(MAX_SIZE, grid_size +1 )
+                elif go_btn.collidepoint(event.pos):
+                    return grid_size
+                elif back_btn.collidepoint(event.pos):
+                    return None
+
+                
 
         
 
@@ -323,12 +334,17 @@ def start_screen(window, clock):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return None
-            
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for i, rect in enumerate(rects):
                     if rect.collidepoint(event.pos):
                         return gamemodes[i][1]
-                    
+
+                if wild_rect.collidepoint(event.pos):
+                    chosen = wildcard_screen(window, clock)
+                    if chosen is not None:
+                        return chosen
+                
 
 
             
