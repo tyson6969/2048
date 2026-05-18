@@ -270,6 +270,15 @@ def start_screen(window, clock):
         window.blit(sub, (WIDTH // 2 - sub.get_width() // 2, 215))
 
 
+        
+        rects = []
+
+        for i, (label, _ ) in enumerate(gamemodes):
+            cy = start_y + 1 * (btn_h + 18 )
+            rect = draw_button(window, label, WIDTH // 2, cy, btn_w, btn_h , btn_colors[i])
+            rects.append(rect)
+
+
 
         pygame.display.update()
         for event in pygame.event.get():
@@ -289,6 +298,15 @@ def main(window):
     grid_size = start_screen(window, clock)
     if grid_size is None:
         return
+    
+
+    ROWS = grid_size
+    COLS = grid_size
+    RECT_HEIGHT = HEIGHT // ROWS
+    RECT_WIDTH= WIDTH // COLS 
+    
+
+
 
     
 
