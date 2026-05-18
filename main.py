@@ -235,11 +235,62 @@ def draw_button(window, text, cx, cy, w, h, color, text_color = (255,255,255)):
     label = MENU_FONT.render(text, True, text_color)
     window.blit(label, (rect.centerx - label.get_width() // 2, rect.centery - label.get_height() // 2))
 
-    return rect
+    return rect 
+
+
+
+
+
+
+
+def start_screen(window, clock):
+    gamemodes = [
+        ("easy   —  4 x 4",  4),
+        ("normal — 5 x 5",   5),
+        ("hard   —  6 x 6",  6),
+    ]
+
+    btn_colors = [
+        (119, 175, 120),  
+        (220, 160,  60),   
+        (195,  80,  80),   
+    ]
+
+    wildcard_color = (100,130, 195)
+    btn_w , btn_h = 360, 65
+    start_y = 280
+
+    while True:
+        window.fill(BACKGROUND_COLOR)
+
+        title = TITLE_FONT.render("2048", True, FONT_COLOR)
+        window.blit(title, (WIDTH //2 - title.get_width() // 2,100))
+
+        sub = SMALL_FONT.render("choose a difficuly", True, FONT_COLOR)
+        window.blit(sub, (WIDTH // 2 - sub.get_width() // 2, 215))
+
+
+
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return None
+            
+        clock.tick(FPS)
+
 
 
 def main(window):
+
+    global ROWS, COLS , RECT_HEIGHT, RECT_WIDTH, FONT
     clock = pygame.time.Clock()
+
+    grid_size = start_screen(window, clock)
+    if grid_size is None:
+        return
+
+    
 
     tiles = generate_tiles()
     run = True
