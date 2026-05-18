@@ -274,9 +274,10 @@ def start_screen(window, clock):
         rects = []
 
         for i, (label, _ ) in enumerate(gamemodes):
-            cy = start_y + 1 * (btn_h + 18 )
+            cy = start_y + i * (btn_h + 18 )
             rect = draw_button(window, label, WIDTH // 2, cy, btn_w, btn_h , btn_colors[i])
             rects.append(rect)
+
 
 
 
@@ -285,6 +286,12 @@ def start_screen(window, clock):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return None
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for i, rect in enumerate(rects):
+                    if rect.collidepoint(event.pos):
+                        return gamemodes[i][1]
+
             
         clock.tick(FPS)
 
@@ -304,6 +311,10 @@ def main(window):
     COLS = grid_size
     RECT_HEIGHT = HEIGHT // ROWS
     RECT_WIDTH= WIDTH // COLS 
+    
+    font_size = max(28, 60 - (grid_size - 4 )* 10)
+    FONT = pygame.font.SysFont("comic sans", font_size, bold = True)
+    
     
 
 
