@@ -86,7 +86,7 @@ class Tile:
         window.blit(text, (self.x + (RECT_WIDTH /2 - text.get_width()/ 2), self.y + (RECT_HEIGHT /2 - text.get_height() / 2 )) )
 
         if self.just_merged:
-            flash = pygame.surface((RECT_WIDTH, RECT_HEIGHT), pygame.SRCALPHA)
+            flash = pygame.Surface((RECT_WIDTH, RECT_HEIGHT), pygame.SRCALPHA)
             flash.fill((255, 255, 255, 100))
             window.blit(flash, (self.x, self.y))
             self.just_merged = False
@@ -148,6 +148,9 @@ def snap(tiles):
 
 
 def move_tiles(window, tiles, clock, direction):
+
+    global score, moves, merges, highest_tile, high_score
+
     updated = True
     blocks = set()
     did_move = False
@@ -158,7 +161,7 @@ def move_tiles(window, tiles, clock, direction):
         reverse = False 
         delta = (-MOVE_VEL, 0)
         boundary_check = lambda tile: tile.col == 0
-        get_next_tile = lambda tile: tiles.get(f"{tile.row}{tile.col - 1}")
+        get_next_tile = lambda tile: tiles.get(f"{tile.row},{tile.col - 1}")
         merge_check = lambda tile, next_tile: tile.x > next_tile.x + MOVE_VEL
         move_check = (lambda tile, next_tile: tile.x > next_tile.x + RECT_WIDTH + MOVE_VEL)
         ceil = True
@@ -168,7 +171,7 @@ def move_tiles(window, tiles, clock, direction):
         reverse = True 
         delta = (MOVE_VEL, 0)
         boundary_check = lambda tile: tile.col == COLS - 1
-        get_next_tile = lambda tile: tiles.get(f"{tile.row}{tile.col + 1}")
+        get_next_tile = lambda tile: tiles.get(f"{tile.row},{tile.col + 1}")
         merge_check = lambda tile, next_tile: tile.x < next_tile.x - MOVE_VEL
         move_check = (lambda tile, next_tile: tile.x + RECT_WIDTH + MOVE_VEL < next_tile.x )
         ceil = False
@@ -178,7 +181,7 @@ def move_tiles(window, tiles, clock, direction):
         reverse = False 
         delta = (0, -MOVE_VEL)
         boundary_check = lambda tile: tile.row == 0
-        get_next_tile = lambda tile: tiles.get(f"{tile.row -1 }{tile.col }")
+        get_next_tile = lambda tile: tiles.get(f"{tile.row -1 },{tile.col }")
         merge_check = lambda tile, next_tile: tile.y > next_tile.y + MOVE_VEL
         move_check = (lambda tile, next_tile: tile.y > next_tile.y + RECT_HEIGHT + MOVE_VEL)
         ceil = True
@@ -188,7 +191,7 @@ def move_tiles(window, tiles, clock, direction):
         reverse = True
         delta = (0, MOVE_VEL)
         boundary_check = lambda tile: tile.row == ROWS - 1
-        get_next_tile = lambda tile: tiles.get(f"{tile.row +1 }{tile.col }")
+        get_next_tile = lambda tile: tiles.get(f"{tile.row +1 },{tile.col }")
         merge_check = lambda tile, next_tile: tile.y < next_tile.y - MOVE_VEL
         move_check = (lambda tile, next_tile: tile.y + RECT_HEIGHT + MOVE_VEL< next_tile.y )
         ceil = False
@@ -221,14 +224,9 @@ def move_tiles(window, tiles, clock, direction):
                     if score > high_score:
                         high_score = score
 
-                    next_tile,just_merged = True
+                    next_tile.just_merged = True
                     if merge_sound:
                         merge_sound.play()
-
-
-
-
-
 
             elif move_check(tile, next_tile):
                 tile.move(delta)
@@ -246,7 +244,7 @@ def move_tiles(window, tiles, clock, direction):
     draw(window, tiles)
 
     if did_move:
-        moves =+1
+        moves +=1
 
 
     return end_tiles(tiles)
@@ -293,7 +291,7 @@ def lose_screen(window, clock):
     elapsed = time.time() - start_time
     mins = int(elapsed // 60)
     secs = int(elapsed % 60)
-    time_text = f"{mins:02d};{secs:02d}"
+    time_text = f"{mins:02d}:{secs:02d}"
 
     btn_color = (119,110,101)
     red_color = (195, 80, 84)
@@ -330,15 +328,6 @@ def lose_screen(window, clock):
                 if quit_btn.collidepoint(event.pos):
                     return "quit"
 
-
-        
-            
-        
-        
-
-
-
-
 def wildcard_screen(window, clock):
 
     grid_size = 4
@@ -351,16 +340,16 @@ def wildcard_screen(window, clock):
     while True:
         window.fill(BACKGROUND_COLOR)
         tittle = MENU_FONT.render("pick your grid size",True, FONT_COLOR)
-        window.blit(tittle ,(WIDTH // 2 - tittle.get_width()// 2,120 ))
+        window.blit(tittle ,(WIDTH // 2 - tittle.get_width()// 2,60 ))
 
         size_text = TITLE_FONT.render(F'{grid_size}x {grid_size}', True, FONT_COLOR)
-        window.blit(size_text, (WIDTH // 2 - size_text.get_width()// 2, 230))
+        window.blit(size_text, (WIDTH // 2 - size_text.get_width()// 2, 160))
 
         hint = SMALL_FONT.render(f"(min {MIN_SIZE}  —  max {MAX_SIZE})", True, FONT_COLOR)
-        window.blit(hint, (WIDTH // 2 - hint.get_width()// 2, 365))
+        window.blit(hint, (WIDTH // 2 - hint.get_width()// 2, 300))
 
-        left_btn = draw_button(window,"<", 240,300,110,70, arrow_color)
-        right_btn = draw_button(window, " >", 540 ,300, 110,70, arrow_color)
+        left_btn = draw_button(window,"<",          160,    300,110,70, arrow_color)
+        right_btn = draw_button(window, " >",       640,    300,110,70, arrow_color)
         go_btn = draw_button(window, "Start game", WIDTH //2 , 490, 260, 70, (199,144, 90))
         back_btn = draw_button(window, "Go back", WIDTH //2, 590, 180 , 55, btn_color)
 
@@ -378,15 +367,6 @@ def wildcard_screen(window, clock):
                     return grid_size
                 elif back_btn.collidepoint(event.pos):
                     return None
-
-                
-
-        
-
-
-
-
-
 
 
 def start_screen(window, clock):
@@ -410,10 +390,10 @@ def start_screen(window, clock):
         window.fill(BACKGROUND_COLOR)
 
         title = TITLE_FONT.render("2048", True, FONT_COLOR)
-        window.blit(title, (WIDTH //2 - title.get_width() // 2,100))
+        window.blit(title, (WIDTH //2 - title.get_width() // 2,0))
 
         sub = SMALL_FONT.render("choose a difficuly", True, FONT_COLOR)
-        window.blit(sub, (WIDTH // 2 - sub.get_width() // 2, 215))
+        window.blit(sub, (WIDTH // 2 - sub.get_width() // 2, 180))
 
 
         
@@ -455,7 +435,9 @@ def start_screen(window, clock):
 
 def main(window):
 
-    global ROWS, COLS , RECT_HEIGHT, RECT_WIDTH, FONT
+    global ROWS, COLS, RECT_HEIGHT, RECT_WIDTH, FONT
+    global score, moves, merges, highest_tile, start_time
+
     clock = pygame.time.Clock()
 
     while True:
@@ -500,16 +482,16 @@ def main(window):
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a: 
                         move_tiles(window,tiles,clock, "left")
 
-                    if event.key == pygame.K_RIGHT or event.key == pygame.K_d:  
+                    elif event.key == pygame.K_RIGHT or event.key == pygame.K_d:  
                         move_tiles(window,tiles,clock, "right")
 
-                    if event.key == pygame.K_UP or event.key == pygame.K_w:  
+                    elif event.key == pygame.K_UP or event.key == pygame.K_w:  
                         move_tiles(window,tiles,clock, "up")
 
-                    if event.key == pygame.K_DOWN or event.key == pygame.K_s: 
+                    elif event.key == pygame.K_DOWN or event.key == pygame.K_s: 
                         move_tiles(window,tiles,clock, "down")
 
-                    if result == "lost":
+                    elif result == "lost":
                         action = lose_screen(window, clock)
                         if action == "menu":
                          run = False
