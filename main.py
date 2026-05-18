@@ -29,6 +29,10 @@ MOVE_VEL = 20
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("upgraded 2048")
 
+TITLE_FONT = pygame.font.SysFont("comic  sans", 100 , bold = True)
+MENU_FONT =  pygame.font.SysFont("comic  sans", 42 , bold = True)
+SMALL_FONT = pygame.font.SysFont("comic  sans", 28 , bold = True)
+
 
 class Tile:
 
@@ -198,7 +202,7 @@ def move_tiles(window, tiles, clock, direction):
 
 
 def end_tiles(tiles):
-    if len(tiles) == 16:
+    if len(tiles) == ROWS * COLS:
         return"lost"
     
     row, col = get_random_pos(tiles)  
@@ -223,6 +227,15 @@ def generate_tiles():
         tiles[f"{row}{col}"] = Tile(2, row , col)
 
     return tiles  
+
+
+def draw_button(window, text, cx, cy, w, h, color, text_color = (255,255,255)):
+    rect = pygame.Rect(cx - w // 2, cy- h// 2, w, h)
+    pygame.draw.rect(window,color,rect , border_radius=12)
+    label = MENU_FONT.render(text, True, text_color)
+    window.blit(label, (rect.centerx - label.get_width() // 2, rect.centery - label.get_height() // 2))
+
+    return rect
 
 
 def main(window):
