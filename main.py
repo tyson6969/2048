@@ -45,8 +45,8 @@ high_score =0
 
 
 pygame.mixer.init()
-merge_sound = pygame.mixer.Sound("idk we will find later")
-merge_sound = None 
+merge_sound = pygame.mixer.Sound("Deep Meow Sound Effect.wav")
+
 
 
 class Tile:
@@ -70,6 +70,7 @@ class Tile:
         self.col = col
         self.x = col* RECT_WIDTH
         self.y = row * RECT_HEIGHT
+        self.just_merged = False
 
     def get_color(self):
         color_index = int(math.log2(self.value)) -1
@@ -83,6 +84,12 @@ class Tile:
         
         text = FONT.render(str(self.value),1 , FONT_COLOR)
         window.blit(text, (self.x + (RECT_WIDTH /2 - text.get_width()/ 2), self.y + (RECT_HEIGHT /2 - text.get_height() / 2 )) )
+
+        if self.just_merged:
+            flash = pygame.surface((RECT_WIDTH, RECT_HEIGHT), pygame.SRCALPHA)
+            flash.fill((255, 255, 255, 100))
+            window.blit(flash, (self.x, self.y))
+            self.just_merged = False
 
     def set_pos(self, ceil = False):
         if ceil: 
@@ -125,21 +132,25 @@ def draw(window, tiles):
     pygame.display.update()
 
 def get_random_pos(tiles):
-    row = None
-    col = None 
     while True:
         row= random.randrange(0, ROWS)
         col = random.randrange(0, COLS)
 
-        if f"{row}{col}" not in tiles :
+        if f"{row},{col}" not in tiles :
             break
 
     return  row , col
+
+def snap(tiles):
+    for tile in tiles.values():
+        tile.x = tile.col * RECT_WIDTH
+        tile.y = tile.row * RECT_HEIGHT
 
 
 def move_tiles(window, tiles, clock, direction):
     updated = True
     blocks = set()
+    did_move = False
 
 
     if direction == "left":
@@ -202,6 +213,23 @@ def move_tiles(window, tiles, clock, direction):
                     next_tile.value *= 2
                     sorted_tiles.pop(i)
                     blocks.add(next_tile)
+                    did_move = True
+                    score += next_tile.value
+                    merges += 1
+                    if next_tile.value > highest_tile:
+                        highest_tile = next_tile.value
+                    if score > high_score:
+                        high_score = score
+
+                    next_tile,just_merged = True
+                    if merge_sound:
+                        merge_sound.play()
+
+
+
+
+
+
             elif move_check(tile, next_tile):
                 tile.move(delta)
             else:
@@ -213,6 +241,14 @@ def move_tiles(window, tiles, clock, direction):
 
         update_tiles(window, tiles, sorted_tiles)
 
+
+    snap(tiles)
+    draw(window, tiles)
+
+    if did_move:
+        moves =+1
+
+
     return end_tiles(tiles)
 
 
@@ -221,7 +257,7 @@ def end_tiles(tiles):
         return"lost"
     
     row, col = get_random_pos(tiles)  
-    tiles[f"{row}{col}"] = Tile(random.choice([2,4]), row, col)
+    tiles[f"{row},{col}"] = Tile(random.choice([2,4]), row, col)
     return "contuine"
 
 
@@ -229,7 +265,7 @@ def end_tiles(tiles):
 def update_tiles(window, tiles, sorted_tiles):
     tiles.clear()
     for tile in sorted_tiles:
-         tiles[f"{tile.row}{tile.col}"] = tile
+         tiles[f"{tile.row},{tile.col}"] = tile
 
     draw(window, tiles)
     
@@ -239,7 +275,7 @@ def generate_tiles():
     tiles = {}
     for _ in range (2):
         row, col = get_random_pos(tiles)
-        tiles[f"{row}{col}"] = Tile(2, row , col)
+        tiles[f"{row},{col}"] = Tile(2, row , col)
 
     return tiles  
 
@@ -251,6 +287,56 @@ def draw_button(window, text, cx, cy, w, h, color, text_color = (255,255,255)):
     window.blit(label, (rect.centerx - label.get_width() // 2, rect.centery - label.get_height() // 2))
 
     return rect 
+
+
+def lose_screen(window, clock):
+    elapsed = time.time() - start_time
+    mins = int(elapsed // 60)
+    secs = int(elapsed % 60)
+    time_text = f"{mins:02d};{secs:02d}"
+
+    btn_color = (119,110,101)
+    red_color = (195, 80, 84)
+
+    while True:
+        window.fill(BACKGROUND_COLOR)
+        title = TITLE_FONT.render("game over", True, FONT_COLOR)
+        window.blit(title, (WIDTH // 2 - title.get_width() // 2, 55))
+
+        stats = [
+            f"score         {score}",
+            f"best score    {high_score}",
+            f"highest tile  {highest_tile}",
+            f"moves made    {moves}",
+            f"merges        {merges}",
+            f"time          {time_text}",
+        ]
+
+        for i, line in enumerate(stats ):
+            surf = SMALL_FONT.render(line, True, FONT_COLOR)
+            window.blit(surf, (WIDTH // 2 - surf.get_width() // 2, 200 + i * 50) )
+
+        menu_btn = draw_button(window, "main menu",WIDTH // 2, 610, 280, 62, btn_color )
+        quit_btn = draw_button(window, "quit",      WIDTH // 2, 690, 280, 62, red_color)
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "quit"
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if menu_btn.collidepoint(event.pos):
+                    return "menu"
+                if quit_btn.collidepoint(event.pos):
+                    return "quit"
+
+
+        
+            
+        
+        
+
+
 
 
 def wildcard_screen(window, clock):
@@ -268,10 +354,10 @@ def wildcard_screen(window, clock):
         window.blit(tittle ,(WIDTH // 2 - tittle.get_width()// 2,120 ))
 
         size_text = TITLE_FONT.render(F'{grid_size}x {grid_size}', True, FONT_COLOR)
-        window.blit(size_text, (WIDTH // 2 - size_text.get_width()// 2, 360))
+        window.blit(size_text, (WIDTH // 2 - size_text.get_width()// 2, 230))
 
         hint = SMALL_FONT.render(f"(min {MIN_SIZE}  —  max {MAX_SIZE})", True, FONT_COLOR)
-        window.blit(hint, (WIDTH // 2 - hint.get_width()// 2, 360))
+        window.blit(hint, (WIDTH // 2 - hint.get_width()// 2, 365))
 
         left_btn = draw_button(window,"<", 240,300,110,70, arrow_color)
         right_btn = draw_button(window, " >", 540 ,300, 110,70, arrow_color)
@@ -372,48 +458,65 @@ def main(window):
     global ROWS, COLS , RECT_HEIGHT, RECT_WIDTH, FONT
     clock = pygame.time.Clock()
 
-    grid_size = start_screen(window, clock)
-    if grid_size is None:
-        return
-    
+    while True:
 
-    ROWS = grid_size
-    COLS = grid_size
-    RECT_HEIGHT = HEIGHT // ROWS
-    RECT_WIDTH= WIDTH // COLS 
-    
-    font_size = max(28, 60 - (grid_size - 4 )* 10)
-    FONT = pygame.font.SysFont("comic sans", font_size, bold = True)
-    
-    
+        score = 0
+        moves = 0
+        merges = 0
+        highest_tile = 2 
+
+        grid_size = start_screen(window, clock)
+        if grid_size is None:
+            return
+        
+
+        ROWS = grid_size
+        COLS = grid_size
+        RECT_HEIGHT = HEIGHT // ROWS
+        RECT_WIDTH= WIDTH // COLS 
+        
+        font_size = max(28, 60 - (grid_size - 4 )* 10)
+        FONT = pygame.font.SysFont("comic sans", font_size, bold = True)
+        start_time = time.time()
+        
+        
 
 
 
-    
+        
 
-    tiles = generate_tiles()
-    run = True
-    while run:
-        clock.tick(FPS)
+        tiles = generate_tiles()
+        run = True
+        while run:
+            clock.tick(FPS)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                break
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                    break
 
-            if event.type == pygame.KEYDOWN :
-                if event.key == pygame.K_LEFT or event.key == pygame.K_a: 
-                    move_tiles(window,tiles,clock, "left")
+                if event.type == pygame.KEYDOWN :
+                    result = None
+                    if event.key == pygame.K_LEFT or event.key == pygame.K_a: 
+                        move_tiles(window,tiles,clock, "left")
 
-                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:  
-                    move_tiles(window,tiles,clock, "right")
+                    if event.key == pygame.K_RIGHT or event.key == pygame.K_d:  
+                        move_tiles(window,tiles,clock, "right")
 
-                if event.key == pygame.K_UP or event.key == pygame.K_w:  
-                    move_tiles(window,tiles,clock, "up")
+                    if event.key == pygame.K_UP or event.key == pygame.K_w:  
+                        move_tiles(window,tiles,clock, "up")
 
-                if event.key == pygame.K_DOWN or event.key == pygame.K_s: 
-                    move_tiles(window,tiles,clock, "down")
-        draw(window, tiles)
+                    if event.key == pygame.K_DOWN or event.key == pygame.K_s: 
+                        move_tiles(window,tiles,clock, "down")
+
+                    if result == "lost":
+                        action = lose_screen(window, clock)
+                        if action == "menu":
+                         run = False
+                        else:
+                            return
+                    
+            draw(window, tiles)
     
     
 
