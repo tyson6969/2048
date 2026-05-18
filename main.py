@@ -238,6 +238,40 @@ def draw_button(window, text, cx, cy, w, h, color, text_color = (255,255,255)):
     return rect 
 
 
+def wildcar_screen(window, clock):
+
+    grid_size = 4
+    MIN_SIZE = 3
+    MAX_SIZE = 8
+
+    arrow_color = (143,122,102)
+    btn_color=(119,110,101)
+
+    while True:
+        window.fill(BACKGROUND_COLOR)
+        tittle = MENU_FONT.render("pick your grid size",True, FONT_COLOR)
+        window.blit(tittle ,(WIDTH // 2 - tittle.get_width()// 2,120 ))
+
+        size_text = TITLE_FONT.render(F'{grid_size}x {grid_size}', True, FONT_COLOR)
+        window.blit(size_text, (WIDTH // 2 - size_text.get_width()// 2, 360))
+
+        hint = SMALL_FONT.render(f"(min {MIN_SIZE}  —  max {MAX_SIZE})", True. FONT_COLOR)
+        window.blit(hint, (WIDTH // 2 - hint.get_width()// 2, 360))
+
+        left_btn = draw_button(window,"<", 240,300,110,70, arrow_color)
+        right_btn = draw_button(window, " >", 540 ,300, 110,70, arrow_color)
+        go_btn = draw_button(window, "Start game", WIDTH //2 , 490, 260, 70, (199,144, 90))
+        back_btn = draw_button(window, "Go back", WIDTH //2, 590, 180 , 55, btn_color)
+
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return None
+
+        
+
+
 
 
 
@@ -279,6 +313,9 @@ def start_screen(window, clock):
             rects.append(rect)
 
 
+        wild_rect = draw_button(window, "wild card", WIDTH //2, start_y + 3 * (btn_h + 18 )+ 20, btn_w, btn_h, wildcard_color)
+
+
 
 
         pygame.display.update()
@@ -291,6 +328,8 @@ def start_screen(window, clock):
                 for i, rect in enumerate(rects):
                     if rect.collidepoint(event.pos):
                         return gamemodes[i][1]
+                    
+
 
             
         clock.tick(FPS)
