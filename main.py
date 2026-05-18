@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import time
 
 pygame.init()
 
@@ -32,6 +33,20 @@ pygame.display.set_caption("upgraded 2048")
 TITLE_FONT = pygame.font.SysFont("comic  sans", 100 , bold = True)
 MENU_FONT =  pygame.font.SysFont("comic  sans", 42 , bold = True)
 SMALL_FONT = pygame.font.SysFont("comic  sans", 28 , bold = True)
+
+
+
+score = 0
+moves = 0
+merges = 0
+highest_tile =2
+start_time = 0.0
+high_score =0 
+
+
+pygame.mixer.init()
+merge_sound = pygame.mixer.Sound("idk we will find later")
+merge_sound = None 
 
 
 class Tile:
